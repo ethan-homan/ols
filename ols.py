@@ -14,7 +14,7 @@ class OLS:
         self.columns = feats.columns
         self.n = feats.shape[0]
         self.p = feats.shape[1]
-        self._ext_design_mat = OLS._make_ext_design_mat(np.array(feats), y)
+        self._ext_mat = OLS._make_ext_mat(np.array(feats), y)
         self.tss = ((y - y.mean()) ** 2).sum()
 
         self.rss = None
@@ -47,9 +47,9 @@ class OLS:
         return h
 
     @staticmethod
-    def _make_ext_design_mat(feats: np.ndarray, y: np.ndarray):
+    def _make_ext_mat(feats: np.ndarray, y: np.ndarray):
         """
-        Builds an extended design matrix that can be operated on by
+        Builds a matrix that can be operated on by
         OLS._partial_inverse to add and remove variables from the regression.
 
          XtX | YtX                                           (XtX)-1 | b^
@@ -97,9 +97,9 @@ class OLS:
 
     def fit(self):
         for i in range(self.p):
-            self._ext_design_mat = OLS._partial_inverse(self._ext_design_mat, i)
+            self._ext_mat = OLS._partial_inverse(self._ext_mat, i)
 
         self._is_fit = True
-        self.parameters = list(self._ext_design_mat[-1:, :-1][0])
-        self.rss = self._ext_design_mat[-1, -1]
-        self.parameters_se = list(np.sqrt(np.abs(np.diagonal(self._ext_design_mat[:-1, : -1])*(self.rss/(self.n - self.p - 1)))))
+        self.parameters = list(self._ext_mat[-1:, :-1][0])
+        self.rss = self._ext_mat[-1, -1]
+        self.parameters_se = list(np.sqrt(np.abs(np.diagonal(self._ext_mat[:-1, : -1])*(self.rss/(self.n - self.p - 1)))))
